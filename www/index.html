@@ -1,0 +1,22 @@
+<!doctype html>
+<head>
+  <title>Synacor Challenge Websocket Debugger</title>
+</head>
+<body>
+
+<script>
+  var ws = new WebSocket("ws://roessland.com:8080/debug");
+
+  function spam() {
+    ws.send("spam spam spam");
+  }
+  ws.onopen = function(event) {
+    ws.send("I connected, yo!")
+    setInterval(spam, 1000);
+  }
+  ws.onmessage = function(event) {
+    console.log(event.data);
+  }
+
+</script>
+</body>

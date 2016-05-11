@@ -29,67 +29,33 @@ func NewVM() *VM {
 	}
 }
 
-func IsRegister(address uint16) bool {
-	if 0 <= address && address <= 32767 {
-		return false
-	} else if 32768 <= address && address <= 32775 {
-		return true
-	} else {
-		log.Print("VM Get: Invalid memory value %v\n", address)
-		return false
-	}
-}
-
-// At returns the literal value if it is in [0,32767], but if the value
-// is in [32768, 32775] the value in the corresponding register is returned.
-// ONLY for getting a, b, c. Not for memory!
-func (vm *VM) Enhance(address uint16) uint16 {
-	value := vm.Memory[address]
+// Enhance returns the literal value if ptr points to a literal number, or the
+// register value if ptr is a pointer to the registry.
+func (vm *VM) Enhance(ptr uint16) uint16 {
+	value := vm.Memory[ptr]
 	if 0 <= value && value <= 32767 {
 		return value
 	} else if 32768 <= value && value <= 32775 {
 		return vm.Register[value-32768]
 	} else {
 		log.Print("VM Enhance: Invalid memory value %v\n", value)
-		return 50000
+		return 40001
 	}
 }
 
-func (vm *VM) At(address uint16) uint16 {
-	value := vm.Memory[address]
+// At returns the value pointed at by the given pointer. Works for both
+// registers and memory pointers.
+func (vm *VM) At(ptr uint16) uint16 {
+	value := vm.Memory[ptr]
 	if 0 <= value && value <= 32767 {
 		return vm.Memory[value]
 	} else if 32768 <= value && value <= 32775 {
 		return vm.Register[value-32768]
 	} else {
-		log.Print("VM At: Invalid memory value %v\n", value)
-		return 50000
+		log.Fatalf("VM At: Invalid memory access to %v\n", value)
+		return 40002
 	}
 }
-
-func (vm *VM) Set(address uint16, value uint16) {
-	if 0 <= address && address <= 32767 {
-		vm.Memory[address] = value
-	} else if 32768 <= address && address <= 32775 {
-		vm.Register[address-32768] = value
-	} else {
-		log.Print("VM Get: Invalid memory write %v\n", address)
-	}
-}
-
-/*
-Current op: 4
-Current op: 8
-Current op: 10
-Current op: 4
-Current op: 8
-Current op: 6
-Current op: 15
-Current op: 4
-Current op: 8
-Current op: 19
-nCurrent op: 19
-*/
 
 func (vm *VM) Execute() {
 	opnames := map[uint16]string{
@@ -311,5 +277,6 @@ func main() {
 	log.SetOutput(os.Stdout)
 	vm := NewVM()
 	vm.LoadBinary("challenge.bin")
+	Debug(vm)
 	vm.Execute()
 }
